@@ -25,6 +25,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Dark mode toggle
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const darkModeIcon = document.getElementById("dark-mode-icon");
+
+  function applyDarkMode(enabled) {
+    document.body.classList.toggle("dark-mode", enabled);
+    darkModeIcon.textContent = enabled ? "☀️" : "🌙";
+    darkModeToggle.setAttribute("aria-label", enabled ? "Switch to light mode" : "Switch to dark mode");
+  }
+
+  let savedDarkMode = false;
+  try {
+    savedDarkMode = localStorage.getItem("darkMode") === "true";
+  } catch (e) {
+    // localStorage unavailable (e.g. private browsing); default to light mode
+  }
+  applyDarkMode(savedDarkMode);
+
+  darkModeToggle.addEventListener("click", () => {
+    const isDark = document.body.classList.contains("dark-mode");
+    try {
+      localStorage.setItem("darkMode", !isDark);
+    } catch (e) {
+      // localStorage unavailable; preference won't be persisted
+    }
+    applyDarkMode(!isDark);
+  });
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
