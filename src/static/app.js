@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Authentication state
   let currentUser = null;
 
+  // Parse URL parameters once for shared-activity highlighting
+  const urlParams = new URLSearchParams(window.location.search);
+
   // Time range mappings for the dropdown
   const timeRanges = {
     morning: { start: "06:00", end: "08:00" }, // Before school hours
@@ -569,6 +572,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-buttons">
+        <span class="share-label">Share:</span>
+        <button class="share-btn share-twitter" title="Share on X / Twitter">𝕏</button>
+        <button class="share-btn share-facebook" title="Share on Facebook">f</button>
+        <button class="share-btn share-whatsapp" title="Share on WhatsApp">💬</button>
+        <button class="share-btn share-copy" title="Copy link">🔗</button>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -585,6 +595,59 @@ document.addEventListener("DOMContentLoaded", () => {
           openRegistrationModal(name);
         });
       }
+    }
+
+    // Add click handlers for social share buttons
+    const shareUrl = `${window.location.origin}${window.location.pathname}?activity=${encodeURIComponent(name)}`;
+    const shareText = `Check out ${name} at Mergington High School! ${details.description}`;
+
+    activityCard.querySelector(".share-twitter").addEventListener("click", () => {
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    activityCard.querySelector(".share-facebook").addEventListener("click", () => {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    activityCard.querySelector(".share-whatsapp").addEventListener("click", () => {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    const copyButton = activityCard.querySelector(".share-copy");
+    copyButton.addEventListener("click", () => {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        copyButton.textContent = "✓";
+        copyButton.classList.add("copied");
+        setTimeout(() => {
+          copyButton.textContent = "🔗";
+          copyButton.classList.remove("copied");
+        }, 2000);
+      }).catch(() => {
+        copyButton.textContent = "✗";
+        setTimeout(() => {
+          copyButton.textContent = "🔗";
+        }, 2000);
+      });
+    });
+
+    // Highlight this card if it matches the shared activity in the URL
+    if (urlParams.get("activity") === name) {
+      activityCard.classList.add("highlighted");
+      setTimeout(() => {
+        activityCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
     }
 
     activitiesList.appendChild(activityCard);
